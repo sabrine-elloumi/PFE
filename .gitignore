@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.so
+*.dll
+*.exe
+*.egg
+*.egg-info/
+dist/
+build/
+
+# Environnement virtuel
+venv/
+env/
+ENV/
+myenv/
+
+# Données sensibles
+data/*.sql
+
+# VS Code
+.vscode/
+*.code-workspace
