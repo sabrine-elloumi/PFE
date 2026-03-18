@@ -1,0 +1,10 @@
+# Bibliothèques principales pour la manipulation de données
+pandas==2.0.3
+numpy==1.24.3
+
+# Bibliothèques pour les graphiques et visualisations
+matplotlib==3.7.1
+seaborn==0.12.2
+
+# (Optionnel) Pour la lecture de fichiers Excel si besoin
+openpyxl==3.1.2

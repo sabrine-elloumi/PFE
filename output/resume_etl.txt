@@ -1,0 +1,17 @@
+RESUME ETL - SMART PERSONAL FINANCE WALLET
+
+Date de l'analyse: 16/03/2026 11:51
+
+STATISTIQUES GLOBALES:
+  Nombre de transactions: 45,025
+  Transactions apres nettoyage: 43,196
+  Montant total: 58,410,606.03
+  Montant moyen: 1,352.22
+
+PERIODE ANALYSEE:
+  Du: 2022-09-20 09:48:03
+  Au: 2026-02-17 14:23:25
+
+CLASSIFICATION DES CLIENTS:
+  Gros depensier regulier: 1143 clients (50.1%)
+  Petit depensier regulier: 1140 clients (49.9%)
