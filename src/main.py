@@ -17,7 +17,9 @@ from src.transform.classify import (calculer_statistiques_clients,
                                    calculer_statistiques_agents,
                                    classifier_agents)
 from src.load.load import sauvegarder_csv, sauvegarder_resume
-from src.visualization.visualize import creer_graphiques, creer_graphiques_profils_avances
+from src.visualization.visualize import (creer_graphiques, 
+                                         creer_graphiques_profils_avances,
+                                         creer_graphiques_tous_profils)
 
 
 def main():
@@ -334,4 +336,3 @@ if __name__ == "__main__":
 
 
 
-    

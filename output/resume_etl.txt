@@ -2,7 +2,7 @@
 RESUME ETL - SMART PERSONAL FINANCE WALLET
 ================================================================================
 
-Date de l'analyse: 23/03/2026 20:28
+Date de l'analyse: 23/03/2026 22:52
 
 1. STATISTIQUES GLOBALES
 --------------------------------------------------
