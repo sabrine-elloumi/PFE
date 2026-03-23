@@ -1,17 +1,111 @@
+================================================================================
 RESUME ETL - SMART PERSONAL FINANCE WALLET
+================================================================================
 
-Date de l'analyse: 16/03/2026 11:51
+Date de l'analyse: 23/03/2026 20:28
 
-STATISTIQUES GLOBALES:
-  Nombre de transactions: 45,025
-  Transactions apres nettoyage: 43,196
-  Montant total: 58,410,606.03
-  Montant moyen: 1,352.22
+1. STATISTIQUES GLOBALES
+--------------------------------------------------
+   Transactions brutes: 45,025
+   Transactions apres nettoyage: 43,196
+   Taux de conservation: 95.9%
+   Montant total: 58,410,606.03 TND
+   Montant moyen par transaction: 1,352.22 TND
 
-PERIODE ANALYSEE:
-  Du: 2022-09-20 09:48:03
-  Au: 2026-02-17 14:23:25
+   Periode analysee:
+      Du: 2022-09-20 09:48:03
+      Au: 2026-02-17 14:23:25
+      Duree: 1246 jours
 
-CLASSIFICATION DES CLIENTS:
-  Gros depensier regulier: 1143 clients (50.1%)
-  Petit depensier regulier: 1140 clients (49.9%)
+2. ANALYSE CLIENTS (Clients finaux du wallet)
+--------------------------------------------------
+   Nombre de clients actifs: 2,282
+   Nombre total de transactions clients: 7,624
+   Montant total traite par les clients: 234,309.87 TND
+   Montant moyen par client: 102.68 TND
+
+   Classification des clients (6 profils):
+   ----------------------------------------
+      📊 Petit dépensier régulier: 599 clients (26.2%)
+      👑 VIP (Clients Premium): 599 clients (26.2%)
+      🔄 Micro-transactionneur (Fidèle): 514 clients (22.5%)
+      📊 Client standard (Actif modéré): 369 clients (16.2%)
+      📊 Client régulier modéré (Actif): 133 clients (5.8%)
+      💰 Gros dépensier occasionnel: 65 clients (2.8%)
+      ⭐ Gros dépensier régulier (Premium): 3 clients (0.1%)
+
+   Statistiques par profil:
+
+      Petit dépensier régulier:
+         - Nombre de clients: 599
+         - Montant total moyen: 1.76 TND
+         - Transactions moyennes: 1.0
+         - Montant moyen par transaction: 1.76 TND
+
+      VIP (Clients Premium):
+         - Nombre de clients: 599
+         - Montant total moyen: 366.59 TND
+         - Transactions moyennes: 7.8
+         - Montant moyen par transaction: 148.15 TND
+
+      Micro-transactionneur (Fidèle):
+         - Nombre de clients: 514
+         - Montant total moyen: 5.85 TND
+         - Transactions moyennes: 3.1
+         - Montant moyen par transaction: 1.89 TND
+
+      Client standard (Actif modéré):
+         - Nombre de clients: 369
+         - Montant total moyen: 11.77 TND
+         - Transactions moyennes: 1.0
+         - Montant moyen par transaction: 11.77 TND
+
+      Client régulier modéré (Actif):
+         - Nombre de clients: 133
+         - Montant total moyen: 27.91 TND
+         - Transactions moyennes: 2.6
+         - Montant moyen par transaction: 11.15 TND
+
+      Gros dépensier occasionnel:
+         - Nombre de clients: 65
+         - Montant total moyen: 37.84 TND
+         - Transactions moyennes: 1.0
+         - Montant moyen par transaction: 37.84 TND
+
+      Gros dépensier régulier (Premium):
+         - Nombre de clients: 3
+         - Montant total moyen: 48.85 TND
+         - Transactions moyennes: 2.0
+         - Montant moyen par transaction: 24.42 TND
+
+   Top 5 clients par montant:
+      1. Client 4c6c733a-7b0...: 16,868.66 TND (454 transactions)
+      2. Client 46fb6f58-7e1...: 7,575.00 TND (6 transactions)
+      3. Client ea5ddd7e-ed0...: 7,523.80 TND (20 transactions)
+      4. Client f1089146-ff2...: 6,297.11 TND (104 transactions)
+      5. Client 8d267304-169...: 5,790.27 TND (205 transactions)
+
+
+3. ANALYSE AGENTS (Points de vente / Commercants)
+--------------------------------------------------
+   Nombre d'agents actifs: 53
+   Nombre total de transactions traitees: 43,196
+   Montant total traite: 58,410,606.03 TND
+   Moyenne clients servis par agent: 44.3
+
+   Classification des agents:
+      📌 Agent Occasionnel (Standard): 34 agents (64.2%)
+      🏆 Agent Premium (Top performer): 9 agents (17.0%)
+      📌 Agent Occasionnel (Gros montants): 5 agents (9.4%)
+      ⚡ Agent Actif (Multi-transactions): 5 agents (9.4%)
+
+   Top 5 agents par montant traite:
+      1. Agent 180f0e8f-37f...: 22,095,122.56 TND (12279 transactions, 675 clients)
+      2. Agent 9256bed5-a04...: 11,835,326.32 TND (4252 transactions, 170 clients)
+      3. Agent da75b0c2-a2c...: 8,006,955.51 TND (1308 transactions, 4 clients)
+      4. Agent e86ee13e-a9e...: 4,444,993.97 TND (6266 transactions, 509 clients)
+      5. Agent 49dadf85-064...: 3,483,984.66 TND (7736 transactions, 463 clients)
+
+
+================================================================================
+FIN DU RESUME
