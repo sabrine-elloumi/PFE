@@ -1,4 +1,3 @@
-# Python
 __pycache__/
 *.pyc
 *.pyo
@@ -10,16 +9,10 @@ __pycache__/
 *.egg-info/
 dist/
 build/
-
-# Environnement virtuel
 venv/
 env/
 ENV/
-myenv/
-
-# Données sensibles
 data/*.sql
-
-# VS Code
 .vscode/
-*.code-workspace
+.idea/
+output/
