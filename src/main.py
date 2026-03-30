@@ -1,5 +1,6 @@
 import os
 import sys
+
 from datetime import datetime
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -8,6 +9,9 @@ from src.extract.extract import (charger_fichier_sql, extraire_clients,
                                  extraire_providers, extraire_transactions,
                                  extraire_transaction_types)
 from src.transform.clean import (nettoyer_transactions, 
+                                 nettoyer_clients,
+                                 nettoyer_providers,
+                                 nettoyer_transaction_types,
                                  fusionner_avec_referentiels,
                                  garder_transactions_clients,
                                  garder_transactions_providers)
@@ -40,24 +44,35 @@ def main():
     df_trans_brut = extraire_transactions(lignes)
     df_trans_types = extraire_transaction_types(lignes)
     
-    print(f"   Clients: {len(df_clients)}")
-    print(f"   Fournisseurs: {len(df_providers)}")
+    print(f"   Clients bruts: {len(df_clients)}")
+    print(f"   Fournisseurs bruts: {len(df_providers)}")
     print(f"   Transactions brutes: {len(df_trans_brut)}")
-    print(f"   Types de transactions: {len(df_trans_types)}")
+    print(f"   Types de transactions bruts: {len(df_trans_types)}")
     print()
     
-    print("2. NETTOYAGE")
+    print("2. NETTOYAGE DES DONNEES")
     print("-" * 50)
     
+    df_clients = nettoyer_clients(df_clients)
+    df_providers = nettoyer_providers(df_providers)
+    df_trans_types = nettoyer_transaction_types(df_trans_types)
     df_trans = nettoyer_transactions(df_trans_brut)
-    df_trans = fusionner_avec_referentiels(df_trans, df_clients, df_providers)
     
+    print(f"   Clients apres nettoyage: {len(df_clients)}")
+    print(f"   Fournisseurs apres nettoyage: {len(df_providers)}")
+    print(f"   Types de transactions apres nettoyage: {len(df_trans_types)}")
     print(f"   Transactions apres nettoyage: {len(df_trans)}")
     if len(df_trans_brut) > 0:
-        print(f"   Taux de conservation: {(len(df_trans)/len(df_trans_brut)*100):.1f}%")
+        print(f"   Taux de conservation transactions: {(len(df_trans)/len(df_trans_brut)*100):.1f}%")
     print()
     
-    print("3. FILTRAGE CLIENTS")
+    print("3. FUSION AVEC REFERENTIELS")
+    print("-" * 50)
+    
+    df_trans = fusionner_avec_referentiels(df_trans, df_clients, df_providers)
+    print()
+    
+    print("4. FILTRAGE CLIENTS")
     print("-" * 50)
     
     df_trans_clients = garder_transactions_clients(df_trans)
@@ -70,7 +85,7 @@ def main():
         print(f"   Montant total clients: {df_trans_clients['amount'].sum():,.2f} TND")
     print()
     
-    print("4. CLASSIFICATION CLIENTS")
+    print("5. CLASSIFICATION CLIENTS")
     print("-" * 50)
     
     if len(df_trans_clients) > 0:
@@ -94,7 +109,7 @@ def main():
     
     print()
     
-    print("5. ANALYSE FOURNISSEURS")
+    print("6. ANALYSE FOURNISSEURS")
     print("-" * 50)
     
     if len(df_trans_clients) > 0 and len(df_providers) > 0:
@@ -116,22 +131,25 @@ def main():
     
     print()
     
-    print("6. SAUVEGARDE")
+    print("7. SAUVEGARDE DES FICHIERS")
     print("-" * 50)
     
     if len(df_trans_clients) > 0:
         sauvegarder_csv(df_trans_clients, chemin_output, "transactions_clients.csv")
         sauvegarder_csv(stats_clients, chemin_output, "statistiques_clients.csv")
     
+    if len(df_clients) > 0:
+        sauvegarder_csv(df_clients, chemin_output, "clients_nettoyes.csv")
+    
     if len(df_providers) > 0:
-        sauvegarder_csv(df_providers, chemin_output, "providers.csv")
+        sauvegarder_csv(df_providers, chemin_output, "providers_nettoyes.csv")
     
     if len(df_trans_types) > 0:
-        sauvegarder_csv(df_trans_types, chemin_output, "transaction_types.csv")
+        sauvegarder_csv(df_trans_types, chemin_output, "transaction_types_nettoyes.csv")
     
     print()
     
-    print("7. VISUALISATION")
+    print("8. VISUALISATION")
     print("-" * 50)
     
     stats_globales = {
@@ -140,6 +158,8 @@ def main():
         'taux_conservation': (len(df_trans)/len(df_trans_brut)*100) if len(df_trans_brut) > 0 else 0,
         'montant_total': df_trans['amount'].sum() if len(df_trans) > 0 and 'amount' in df_trans.columns else 0,
         'montant_moyen': df_trans['amount'].mean() if len(df_trans) > 0 and 'amount' in df_trans.columns else 0,
+        'clients_avant': len(df_clients) if 'df_clients' in locals() else 0,
+        'clients_apres': len(df_clients) if 'df_clients' in locals() else 0,
         'date_debut': df_trans['transaction_date'].min() if len(df_trans) > 0 and 'transaction_date' in df_trans.columns else None,
         'date_fin': df_trans['transaction_date'].max() if len(df_trans) > 0 and 'transaction_date' in df_trans.columns else None,
         'duree_jours': (df_trans['transaction_date'].max() - df_trans['transaction_date'].min()).days if len(df_trans) > 0 and 'transaction_date' in df_trans.columns else 0
@@ -159,9 +179,9 @@ def main():
     print()
     
     print("="*70)
-    print("ETL TERMINE")
+    print("ETL TERMINE AVEC SUCCES")
     print("="*70)
-    print(f"\nResultats: {chemin_output}/")
+    print(f"\nResultats dans le dossier: {chemin_output}/")
 
 if __name__ == "__main__":
     main()
