@@ -2,7 +2,7 @@
 RESUME ETL - SMART PERSONAL FINANCE WALLET
 ======================================================================
 
-Date: 31/03/2026 00:20
+Date: 04/04/2026 23:39
 
 1. STATISTIQUES GLOBALES
 --------------------------------------------------
@@ -22,13 +22,9 @@ Date: 31/03/2026 00:20
    Montant total: 234,309.87 TND
 
    Classification clients:
-      VIP (Clients Premium): 599 clients (26.2%)
-      Petit depensier regulier: 599 clients (26.2%)
-      Micro-transactionneur (Fidele): 514 clients (22.5%)
-      Client standard (Actif modere): 369 clients (16.2%)
-      Client regulier modere (Actif): 133 clients (5.8%)
-      Gros depensier occasionnel: 65 clients (2.8%)
-      Gros depensier regulier (Premium): 3 clients (0.1%)
+      Client régulier: 1642 clients (72.0%)
+      Premium: 457 clients (20.0%)
+      Gros dépensier actif: 183 clients (8.0%)
 
 3. ANALYSE FOURNISSEURS
 --------------------------------------------------

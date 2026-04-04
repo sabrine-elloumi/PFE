@@ -1,6 +1,7 @@
 import pandas as pd
 
 def calculer_statistiques_clients(df_transactions_clients):
+    """Calcule les statistiques pour chaque client"""
     if len(df_transactions_clients) == 0:
         return pd.DataFrame()
     
@@ -34,25 +35,44 @@ def calculer_statistiques_clients(df_transactions_clients):
     
     return stats
 
+
 def classifier_clients(stats_clients):
+    """
+    Classification des clients en 4 profils distincts
+    
+    Profils:
+    1. Premium (top 20% montant total + actif) - renommé (plus de "VIP")
+    2. Gros dépensier actif (montant moyen élevé + fréquence élevée)
+    3. Client régulier (fréquence moyenne à élevée)
+    4. Client occasionnel (tous les autres)
+    """
     if len(stats_clients) == 0:
         return stats_clients
     
     df = stats_clients.copy()
     
+    # Calcul des seuils basés sur les données REELLES
     percentiles = {
         'freq_high': df['nb_transactions'].quantile(0.75),
         'freq_medium': df['nb_transactions'].quantile(0.50),
         'amount_high': df['montant_moyen'].quantile(0.75),
         'amount_medium': df['montant_moyen'].quantile(0.50),
-        'total_high': df['montant_total'].quantile(0.75),
+        'total_high': df['montant_total'].quantile(0.80),  # Top 20%
     }
     
-    print(f"\n   SEUILS DE CLASSIFICATION (6 profils):")
-    print(f"   Frequence: Haut={percentiles['freq_high']:.0f}, Median={percentiles['freq_medium']:.0f}")
-    print(f"   Montant moyen: Haut={percentiles['amount_high']:.2f}, Median={percentiles['amount_medium']:.2f}")
+    print(f"\n SEUILS DE CLASSIFICATION (4 profils):")
+    print(f"   ┌─────────────────────────────────────────────────┐")
+    print(f"   │ Transactions: Haut≥{percentiles['freq_high']:.0f} │ Médian≥{percentiles['freq_medium']:.0f} │")
+    print(f"   │ Montant moyen: Haut≥{percentiles['amount_high']:.0f} │ Médian≥{percentiles['amount_medium']:.0f} │")
+    print(f"   │ Montant total (Premium): Top 20% ≥{percentiles['total_high']:,.0f} TND │")
+    print(f"   └─────────────────────────────────────────────────┘")
     
     def classifier(row):
+        # PROFIL 1: Premium (Top 20% montant total) - au lieu de "VIP"
+        if row['montant_total'] >= percentiles['total_high']:
+            return "Premium"
+        
+        # Catégories de fréquence pour les autres profils
         if row['nb_transactions'] >= percentiles['freq_high']:
             freq_cat = "tres_actif"
         elif row['nb_transactions'] >= percentiles['freq_medium']:
@@ -60,6 +80,7 @@ def classifier_clients(stats_clients):
         else:
             freq_cat = "occasionnel"
         
+        # Catégories de montant
         if row['montant_moyen'] >= percentiles['amount_high']:
             amount_cat = "gros"
         elif row['montant_moyen'] >= percentiles['amount_medium']:
@@ -67,133 +88,98 @@ def classifier_clients(stats_clients):
         else:
             amount_cat = "petit"
         
-        is_vip = row['montant_total'] >= percentiles['total_high']
+        # PROFIL 2: Gros dépensier actif
+        if amount_cat == "gros" and freq_cat in ["tres_actif", "actif"]:
+            return "Gros dépensier actif"
         
-        if is_vip and row['nb_transactions'] >= percentiles['freq_medium']:
-            return "VIP (Clients Premium)"
-        elif freq_cat == "tres_actif" and amount_cat == "gros":
-            return "Gros depensier regulier (Premium)"
-        elif freq_cat == "tres_actif" and amount_cat == "modere":
-            return "Client regulier modere (Actif)"
-        elif freq_cat == "tres_actif" and amount_cat == "petit":
-            return "Micro-transactionneur (Fidele)"
-        elif freq_cat == "actif" and amount_cat == "gros":
-            return "Gros depensier occasionnel"
-        elif freq_cat == "actif" and amount_cat == "modere":
-            return "Client standard (Actif modere)"
-        elif freq_cat == "actif" and amount_cat == "petit":
-            return "Petit depensier regulier"
-        elif freq_cat == "occasionnel" and amount_cat == "gros":
-            return "Gros depensier rare (Occasionnel)"
-        else:
-            return "Client occasionnel"
+        # PROFIL 3: Client régulier
+        if freq_cat in ["tres_actif", "actif"]:
+            return "Client régulier"
+        
+        # PROFIL 4: Client occasionnel
+        return "Client occasionnel"
     
     df['profil'] = df.apply(classifier, axis=1)
     
+    # Vérification des profils
+    profil_counts = df['profil'].value_counts()
+    print(f"\n RÉPARTITION DES 4 PROFILS:")
+    print(f"   ┌─────────────────────────────────────────────────────┐")
+    for profil, count in profil_counts.items():
+        pourcentage = count / len(df) * 100
+        barre = "█" * int(pourcentage / 2)
+        print(f"   │ {profil:<20} │ {count:>4} clients │ {pourcentage:>5.1f}% │ {barre}")
+    print(f"   └─────────────────────────────────────────────────────┘")
+    
     return df
 
+
 def generer_recommandations(stats_clients, df_transactions, df_trans_types=None):
+    """
+    Génère des recommandations personnalisées pour les 4 profils
+    """
     if len(stats_clients) == 0:
         return pd.DataFrame()
     
     recommendations = []
     
+    # Mapping des recommandations par profil (sans "VIP")
+    rec_mapping = {
+        "Premium": {
+            'rec1': " Programme fidélité Premium - Cashback majoré à 5% sur toutes les transactions",
+            'rec2': " Accès exclusif aux offres partenaires (restaurants, hôtels, voyages)",
+            'rec3': " Conseiller financier dédié avec analyse personnalisée",
+            'alert': " Objectif : Maintenez votre statut Premium avec >5000 TND/mois",
+            'type': 'premium'
+        },
+        "Gros dépensier actif": {
+            'rec1': " Cashback 3% sur vos 3 catégories de dépenses favorites",
+            'rec2': " Offres personnalisées basées sur votre historique d'achats",
+            'rec3': " Rapport mensuel détaillé avec analyse des tendances",
+            'alert': " Objectif Premium : Atteignez 5000 TND/mois pour débloquer le statut Premium",
+            'type': 'premium'
+        },
+        "Client régulier": {
+            'rec1': " Programme de parrainage - Gagnez 50 TND par ami parrainé",
+            'rec2': " Catégories suggérées pour optimiser votre cashback quotidien",
+            'rec3': " Budget personnalisé basé sur vos habitudes de consommation",
+            'alert': " Effectuez 3 transactions par semaine pour +50% de cashback",
+            'type': 'fidelisation'
+        },
+        "Client occasionnel": {
+            'rec1': " 50 TND offerts pour votre prochaine transaction",
+            'rec2': " Découvrez les fonctionnalités du wallet mobile",
+            'rec3': " Cashback 5% pendant les 3 premiers mois",
+            'alert': " Activez votre wallet dès aujourd'hui pour débloquer tous les avantages",
+            'type': 'acquisition'
+        }
+    }
+    
     for _, client in stats_clients.iterrows():
         profil = client['profil']
+        rec_template = rec_mapping.get(profil, rec_mapping["Client occasionnel"])
+        
         rec = {
             'client_id': client['client_id'],
             'profil': profil,
             'montant_total': client['montant_total'],
             'nb_transactions': client['nb_transactions'],
-            'montant_moyen': client['montant_moyen']
+            'montant_moyen': client['montant_moyen'],
+            'recommendation_1': rec_template['rec1'],
+            'recommendation_2': rec_template['rec2'],
+            'recommendation_3': rec_template['rec3'],
+            'recommendation_alert': rec_template['alert'],
+            'recommandation_type': rec_template['type']
         }
-        
-        if profil == "VIP (Clients Premium)":
-            rec.update({
-                'recommendation_1': "Programme fidelite VIP - Cashback majore",
-                'recommendation_2': "Offres exclusives partenaires premium",
-                'recommendation_3': "Conseiller dedie 24/7",
-                'recommendation_alert': "Maintenez votre statut VIP avec plus de 5000 TND/mois",
-                'recommandation_type': 'premium'
-            })
-        elif profil == "Gros depensier regulier (Premium)":
-            rec.update({
-                'recommendation_1': "Cashback sur categories favorites",
-                'recommendation_2': "Offres personnalisees",
-                'recommendation_3': "Analyse mensuelle detaillee",
-                'recommendation_alert': "Objectif VIP: +20% de transactions",
-                'recommandation_type': 'premium'
-            })
-        elif profil == "Gros depensier occasionnel":
-            rec.update({
-                'recommendation_1': "Alertes promotions gros achats",
-                'recommendation_2': "Offres de fidelisation",
-                'recommendation_3': "Planification d'achats",
-                'recommendation_alert': f"Economisez 15% en programmant vos achats (moyenne: {client['montant_moyen']:.0f} TND)",
-                'recommandation_type': 'engagement'
-            })
-        elif profil == "Client regulier modere (Actif)":
-            rec.update({
-                'recommendation_1': "Parrainage - Gagnez 50 TND par filleul",
-                'recommendation_2': "Categories suggerees",
-                'recommendation_3': "Budget personnalise",
-                'recommendation_alert': "Augmentez votre frequence pour acceder aux offres premium",
-                'recommandation_type': 'fidelisation'
-            })
-        elif profil == "Client standard (Actif modere)":
-            rec.update({
-                'recommendation_1': "Cashback 1% sur toutes transactions",
-                'recommendation_2': "Notifications promotions",
-                'recommendation_3': "Defis d'epargne",
-                'recommendation_alert': "3 transactions par semaine = +50% cashback",
-                'recommandation_type': 'standard'
-            })
-        elif profil == "Micro-transactionneur (Fidele)":
-            rec.update({
-                'recommendation_1': "Fidelite petits achats quotidiens",
-                'recommendation_2': "Offres commerces de proximite",
-                'recommendation_3': "Visualisation depenses cumulees",
-                'recommendation_alert': f"{client['nb_transactions']} transactions cumulees = {client['montant_total']:.0f} TND",
-                'recommandation_type': 'fidelisation'
-            })
-        elif profil == "Petit depensier regulier":
-            rec.update({
-                'recommendation_1': "Defis epargne: Economisez 50 TND par mois",
-                'recommendation_2': "Conseils financiers pour petits budgets",
-                'recommendation_3': "Recompenses pour regularite",
-                'recommendation_alert': "Augmentez vos transactions pour plus de recompenses",
-                'recommandation_type': 'education'
-            })
-        elif profil == "Gros depensier rare (Occasionnel)":
-            rec.update({
-                'recommendation_1': "Alertes avant achats importants",
-                'recommendation_2': "Simulation financement",
-                'recommendation_3': "Alertes soldes",
-                'recommendation_alert': "Planifiez vos gros achats pour meilleures offres",
-                'recommandation_type': 'engagement'
-            })
-        elif profil == "Client occasionnel":
-            rec.update({
-                'recommendation_1': "50 TND offerts premiere transaction",
-                'recommendation_2': "Decouvrez le wallet",
-                'recommendation_3': "Cashback 5% sur 3 mois",
-                'recommendation_alert': "Activez votre wallet pour beneficier des avantages",
-                'recommandation_type': 'acquisition'
-            })
-        else:
-            rec.update({
-                'recommendation_1': "Decouvrez nos offres personnalisees",
-                'recommendation_2': "Analyse de vos depenses mensuelles",
-                'recommendation_3': "Programme de fidelite a venir",
-                'recommendation_alert': "Utilisez plus souvent votre wallet",
-                'recommandation_type': 'standard'
-            })
         
         recommendations.append(rec)
     
+    print(f"\n   {len(recommendations)} recommandations générées")
     return pd.DataFrame(recommendations)
 
+
 def calculer_statistiques_providers(df_transactions_clients, df_providers):
+    """Calcule les statistiques pour chaque fournisseur"""
     if len(df_transactions_clients) == 0 or len(df_providers) == 0:
         return pd.DataFrame()
     
@@ -213,24 +199,34 @@ def calculer_statistiques_providers(df_transactions_clients, df_providers):
     stats = stats[stats['nb_transactions'] > 0]
     
     if len(df_providers) > 0:
+        # Trouver la colonne ID du provider
         provider_col = df_providers.columns[0]
         stats = stats.merge(df_providers[[provider_col]], left_on='provider_id', right_on=provider_col, how='left')
     
     return stats
 
+
 def classifier_providers(stats_providers):
+    """
+    Classification des fournisseurs en catégories
+    
+    Cette fonction est appelée dans main.py
+    """
     if len(stats_providers) == 0:
         return stats_providers
     
     df = stats_providers.copy()
     
     if len(df) > 0:
+        # Calcul des seuils pour la classification des providers
         seuil_transactions = df['nb_transactions'].quantile(0.75)
         seuil_montant = df['montant_total'].quantile(0.75)
         
-        print(f"\n   SEUILS DE CLASSIFICATION FOURNISSEURS:")
-        print(f"   Seuil transactions: {seuil_transactions:.0f} transactions")
-        print(f"   Seuil montant: {seuil_montant:,.2f}")
+        print(f"\n  SEUILS DE CLASSIFICATION FOURNISSEURS:")
+        print(f"   ┌─────────────────────────────────────────────────┐")
+        print(f"   │ Transactions: Haut≥{seuil_transactions:.0f} transactions")
+        print(f"   │ Montant total: Haut≥{seuil_montant:,.2f} TND")
+        print(f"   └─────────────────────────────────────────────────┘")
         
         def classifier(row):
             if row['nb_transactions'] >= seuil_transactions and row['montant_total'] >= seuil_montant:
@@ -243,6 +239,14 @@ def classifier_providers(stats_providers):
                 return "Fournisseur Standard"
         
         df['profil_provider'] = df.apply(classifier, axis=1)
+        
+        # Afficher la répartition
+        print(f"\n RÉPARTITION DES FOURNISSEURS:")
+        print(f"   ┌─────────────────────────────────────────────────────┐")
+        profil_counts = df['profil_provider'].value_counts()
+        for profil, count in profil_counts.items():
+            pourcentage = count / len(df) * 100
+            print(f"   │ {profil:<35} │ {count:>3} ({pourcentage:.1f}%) │")
+        print(f"   └─────────────────────────────────────────────────────┘")
     
     return df
-   
