@@ -2,10 +2,12 @@ import pandas as pd
 import re
 
 def charger_fichier_sql(chemin):
+    """Charge le fichier SQL ligne par ligne"""
     with open(chemin, 'r', encoding='utf-8', errors='ignore') as f:
         return f.readlines()
 
 def extraire_clients(lignes):
+    """Extrait les données de la table client"""
     clients_data = []
     en_cours = False
     
@@ -23,11 +25,11 @@ def extraire_clients(lignes):
     
     if clients_data:
         df = pd.DataFrame(clients_data)
-        df['type'] = 'client'
         return df
     return pd.DataFrame()
 
 def extraire_providers(lignes):
+    """Extrait les données de la table provider"""
     providers_data = []
     en_cours = False
     
@@ -45,11 +47,11 @@ def extraire_providers(lignes):
     
     if providers_data:
         df = pd.DataFrame(providers_data)
-        df['type'] = 'provider'
         return df
     return pd.DataFrame()
 
 def extraire_transactions(lignes):
+    """Extrait les données de la table transaction"""
     transactions_data = []
     en_cours = False
     colonnes = None
@@ -85,6 +87,7 @@ def extraire_transactions(lignes):
     return pd.DataFrame()
 
 def extraire_transaction_types(lignes):
+    """Extrait les données de la table transaction_type"""
     types_data = []
     en_cours = False
     
@@ -118,3 +121,4 @@ def extraire_transaction_types(lignes):
         
         return df
     return pd.DataFrame()
+    

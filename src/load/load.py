@@ -2,13 +2,37 @@ import pandas as pd
 from datetime import datetime
 
 def sauvegarder_csv(df, chemin, nom_fichier):
+    """Sauvegarde un DataFrame en CSV (propre pour Power BI)"""
+    if len(df) == 0:
+        print(f"Aucune donnée à sauvegarder pour {nom_fichier}")
+        return None
+    
     chemin_complet = f"{chemin}/{nom_fichier}"
-    df.to_csv(chemin_complet, index=False, encoding='utf-8')
-    print(f"   Sauvegarde: {chemin_complet}")
+    
+    # Nettoyer les valeurs problématiques
+    df = df.copy()
+    
+    # Remplacer les NaN par des valeurs appropriées
+    for col in df.columns:
+        if df[col].dtype == 'object':
+            df[col] = df[col].fillna('')
+        elif df[col].dtype in ['float64', 'int64']:
+            df[col] = df[col].fillna(0)
+    
+    # Pour Power BI : séparateur point-virgule, encodage UTF-8 avec BOM
+    df.to_csv(
+        chemin_complet, 
+        index=False, 
+        encoding='utf-8-sig',  # UTF-8 avec BOM (Power BI l'aime bien)
+        sep=';',                # séparateur point-virgule
+        decimal=','             # virgule pour les décimales
+    )
+    print(f"Sauvegarde: {chemin_complet} ({len(df)} lignes)")
     return chemin_complet
 
 def sauvegarder_resume(stats, df_trans_clients, df_stats_clients, 
                        profil_counts, df_stats_providers, df_trans_providers, chemin):
+    """Sauvegarde un résumé texte de l'ETL"""
     with open(f"{chemin}/resume_etl.txt", 'w', encoding='utf-8') as f:
         f.write("="*70 + "\n")
         f.write("RESUME ETL - SMART PERSONAL FINANCE WALLET\n")
@@ -44,11 +68,12 @@ def sauvegarder_resume(stats, df_trans_clients, df_stats_clients,
             f.write("\n3. ANALYSE FOURNISSEURS\n")
             f.write("-" * 50 + "\n")
             f.write(f"   Fournisseurs actifs: {len(df_stats_providers):,}\n")
-            f.write(f"   Transactions: {len(df_trans_providers):,}\n")
+            if len(df_trans_providers) > 0:
+                f.write(f"   Transactions: {len(df_trans_providers):,}\n")
             if 'montant_total' in df_stats_providers.columns:
                 f.write(f"   Montant total: {df_stats_providers['montant_total'].sum():,.2f} TND\n")
         
         f.write("\n" + "="*70 + "\n")
         f.write("FIN DU RESUME\n")
     
-    print(f"   Resume sauvegarde: {chemin}/resume_etl.txt")
+    print(f"Resume sauvegarde: {chemin}/resume_etl.txt")

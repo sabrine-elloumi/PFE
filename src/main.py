@@ -1,6 +1,6 @@
 import os
 import sys
-
+import pandas as pd
 from datetime import datetime
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -112,8 +112,8 @@ def main():
     print("6. ANALYSE FOURNISSEURS")
     print("-" * 50)
     
-    if len(df_trans_clients) > 0 and len(df_providers) > 0:
-        stats_providers = calculer_statistiques_providers(df_trans_clients, df_providers)
+    if len(df_trans) > 0 and len(df_providers) > 0:
+        stats_providers = calculer_statistiques_providers(df_trans, df_providers)
         if len(stats_providers) > 0:
             stats_providers = classifier_providers(stats_providers)
             
@@ -177,11 +177,10 @@ def main():
             print(f"   Erreur graphiques: {e}")
     
     print()
-    
     print("="*70)
     print("ETL TERMINE AVEC SUCCES")
     print("="*70)
-    print(f"\nResultats dans le dossier: {chemin_output}/")
+    print(f"\n Resultats dans le dossier: {chemin_output}/")
 
 if __name__ == "__main__":
     main()

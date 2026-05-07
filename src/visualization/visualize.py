@@ -7,36 +7,27 @@ BLEU_EXCELLIA = '#302383'
 VERT_EXCELLIA = '#2E8B57'
 ORANGE_EXCELLIA = '#FF8C00'
 
-# Configuration pour éviter les problèmes d'affichage
 plt.rcParams['font.family'] = 'sans-serif'
 plt.rcParams['svg.fonttype'] = 'none'
 
-
 def creer_graphiques(df_transactions, stats_clients, profil_counts, chemin="output"):
-    """
-    Crée 4 graphiques de visualisation avec les données réelles
-    """
+    """Crée 4 graphiques de visualisation"""
     if len(df_transactions) == 0:
         print("Données insuffisantes pour les graphiques")
         return
     
     plt.style.use('seaborn-v0_8-whitegrid')
     
-    # =========================================================
-    # GRAPHIQUE 1: Top 10 clients par montant total
-    # =========================================================
+    # Graphique 1: Top 10 clients
     fig1, ax1 = plt.subplots(figsize=(12, 7))
-    
     top10 = stats_clients.nlargest(10, 'montant_total')
-    
     client_labels = [f'Client #{i+1}' for i in range(len(top10))]
     montants = top10['montant_total'].values
     
     bars = ax1.bar(range(len(top10)), montants, color=ROSE_EXCELLIA, edgecolor='white', linewidth=1.5)
-    
     ax1.set_title('Top 10 des clients par montant total dépensé', fontsize=14, fontweight='bold', color=BLEU_EXCELLIA)
     ax1.set_xlabel('Client', fontsize=11, fontweight='bold')
-    ax1.set_ylabel('Montant total dépensé (TND)', fontsize=11, fontweight='bold')
+    ax1.set_ylabel('Montant total (TND)', fontsize=11, fontweight='bold')
     ax1.set_xticks(range(len(top10)))
     ax1.set_xticklabels(client_labels, rotation=45, ha='right')
     
@@ -50,66 +41,44 @@ def creer_graphiques(df_transactions, stats_clients, profil_counts, chemin="outp
     plt.close()
     print(f"Graphique 1/4: top10_clients_montant.png")
     
-    # =========================================================
-    # GRAPHIQUE 2: Répartition des 4 profils clients (camembert propre)
-    # =========================================================
+    # Graphique 2: Camembert des profils
     fig2, ax2 = plt.subplots(figsize=(9, 7))
-    
-    # Nettoyer et préparer les données
-    profil_data = {}
     ordre_profils = ['Premium', 'Gros dépensier actif', 'Client régulier', 'Client occasionnel']
     
+    profil_data = {}
     for profil in ordre_profils:
         if profil in profil_counts.index:
             profil_data[profil] = profil_counts[profil]
         else:
             profil_data[profil] = 0
     
-    # Enlever les profils avec 0
     labels = [p for p in ordre_profils if profil_data[p] > 0]
     values = [profil_data[p] for p in labels]
-    
     colors = [ROSE_EXCELLIA, ORANGE_EXCELLIA, BLEU_EXCELLIA, VERT_EXCELLIA][:len(labels)]
     
-    # Création du camembert
-    wedges, texts, autotexts = ax2.pie(values, 
-                                        labels=labels,
-                                        autopct=lambda pct: f'{pct:.1f}%',
-                                        colors=colors,
-                                        explode=[0.03] * len(labels),
-                                        shadow=True,
-                                        startangle=90,
-                                        textprops={'fontsize': 11})
+    wedges, texts, autotexts = ax2.pie(values, labels=labels, autopct=lambda pct: f'{pct:.1f}%',
+                                        colors=colors, explode=[0.03] * len(labels),
+                                        shadow=True, startangle=90, textprops={'fontsize': 11})
     
     for autotext in autotexts:
         autotext.set_color('white')
         autotext.set_fontweight('bold')
         autotext.set_fontsize(12)
     
-    ax2.set_title('Répartition des profils clients', fontsize=14, fontweight='bold', color=BLEU_EXCELLIA)
-    
+    ax2.set_title('Répartition des 4 profils clients', fontsize=14, fontweight='bold', color=BLEU_EXCELLIA)
     plt.tight_layout()
     plt.savefig(f"{chemin}/02_repartition_profils_clients.png", dpi=300, bbox_inches='tight', facecolor='white')
     plt.close()
     print(f"Graphique 2/4: repartition_profils_clients.png")
     
-    # =========================================================
-    # GRAPHIQUE 3: Distribution des montants (filtrer les outliers)
-    # =========================================================
+    # Graphique 3: Distribution des montants
     fig3, ax3 = plt.subplots(figsize=(12, 6))
-    
     amounts = df_transactions['amount'].values
-    
-    # Filtrer les valeurs aberrantes pour meilleure visualisation
     q95 = np.percentile(amounts, 95)
     amounts_filtered = amounts[amounts <= q95]
     
-    print(f"   Distribution: {len(amounts_filtered)} transactions sur {len(amounts)} (filtre 95e percentile)")
+    ax3.hist(amounts_filtered, bins=40, color=BLEU_EXCELLIA, alpha=0.7, edgecolor='white', linewidth=1)
     
-    # Histogramme
-    n, bins, patches = ax3.hist(amounts_filtered, bins=40, color=BLEU_EXCELLIA, alpha=0.7, edgecolor='white', linewidth=1)
-    
-    # Statistiques réelles
     mean_val = amounts.mean()
     median_val = np.median(amounts)
     
@@ -124,7 +93,6 @@ def creer_graphiques(df_transactions, stats_clients, profil_counts, chemin="outp
     ax3.legend(loc='upper right')
     ax3.grid(axis='y', alpha=0.3, linestyle='--')
     
-    # Statistiques résumées
     stats_text = f"Total: {len(amounts):,} transactions\nMin: {amounts.min():,.0f} TND\nMax: {amounts.max():,.0f} TND"
     ax3.text(0.98, 0.95, stats_text, transform=ax3.transAxes, fontsize=9,
              verticalalignment='top', horizontalalignment='right',
@@ -135,19 +103,12 @@ def creer_graphiques(df_transactions, stats_clients, profil_counts, chemin="outp
     plt.close()
     print(f"Graphique 3/4: distribution_montants_transactions.png")
     
-    # =========================================================
-    # GRAPHIQUE 4: Évolution mensuelle (agrégée par mois)
-    # =========================================================
+    # Graphique 4: Évolution mensuelle
     if 'mois_annee' in df_transactions.columns:
         fig4, ax4 = plt.subplots(figsize=(14, 6))
-        
-        # Agrégation par mois
         monthly_amount = df_transactions.groupby('mois_annee')['amount'].sum()
-        
-        # Convertir en string pour l'affichage
         months = [str(m) for m in monthly_amount.index]
         
-        # Afficher tous les 3 mois pour lisibilité
         step = max(1, len(months) // 10)
         xticks_pos = range(0, len(months), step)
         xticks_labels = [months[i] for i in xticks_pos]
@@ -156,7 +117,7 @@ def creer_graphiques(df_transactions, stats_clients, profil_counts, chemin="outp
                 linewidth=2, markersize=6)
         ax4.fill_between(range(len(months)), monthly_amount.values, alpha=0.3, color=ROSE_EXCELLIA)
         
-        ax4.set_title('Évolution mensuelle du volume des transactions', fontsize=14, fontweight='bold', color=BLEU_EXCELLIA)
+        ax4.set_title('Évolution mensuelle des transactions', fontsize=14, fontweight='bold', color=BLEU_EXCELLIA)
         ax4.set_xlabel('Mois', fontsize=11, fontweight='bold')
         ax4.set_ylabel('Montant total (TND)', fontsize=11, fontweight='bold')
         ax4.set_xticks(xticks_pos)
@@ -168,8 +129,7 @@ def creer_graphiques(df_transactions, stats_clients, profil_counts, chemin="outp
         plt.close()
         print(f"Graphique 4/4: evolution_mensuelle_transactions.png")
     
-    print(f"\n Graphiques générés dans '{chemin}/'")
-
+    print(f"\n   🎉 Graphiques générés dans '{chemin}/'")
 
 def creer_graphiques_profils_avances(stats_clients, recommendations, chemin="output"):
     """Graphique d'analyse avancée des profils"""
@@ -178,10 +138,10 @@ def creer_graphiques_profils_avances(stats_clients, recommendations, chemin="out
     
     fig, axes = plt.subplots(1, 2, figsize=(14, 5))
     
-    # Graphique 1: Montant total par profil
-    total_par_profil = stats_clients.groupby('profil')['montant_total'].sum()
-    # Réordonner
     ordre = ['Premium', 'Gros dépensier actif', 'Client régulier', 'Client occasionnel']
+    
+    # Graphique A: Montant total par profil
+    total_par_profil = stats_clients.groupby('profil')['montant_total'].sum()
     total_par_profil = total_par_profil.reindex([p for p in ordre if p in total_par_profil.index])
     
     bars1 = axes[0].bar(total_par_profil.index, total_par_profil.values, color=ROSE_EXCELLIA, edgecolor='white')
@@ -193,7 +153,7 @@ def creer_graphiques_profils_avances(stats_clients, recommendations, chemin="out
         axes[0].text(bar.get_x() + bar.get_width()/2, bar.get_height(),
                     f'{val/1000:.1f}K', ha='center', va='bottom', fontsize=9, fontweight='bold')
     
-    # Graphique 2: Nombre moyen de transactions par profil
+    # Graphique B: Nombre moyen de transactions par profil
     trans_par_profil = stats_clients.groupby('profil')['nb_transactions'].mean()
     trans_par_profil = trans_par_profil.reindex([p for p in ordre if p in trans_par_profil.index])
     

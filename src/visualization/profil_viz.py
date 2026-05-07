@@ -1,4 +1,3 @@
-# profil_viz.py - VERSION CORRIGÉE
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
@@ -9,10 +8,7 @@ VERT_EXCELLIA = '#2E8B57'
 ORANGE_EXCELLIA = '#FF8C00'
 
 def creer_graphiques_profils(stats_clients, recommandations=None, chemin="output"):
-    """
-    Crée des graphiques détaillés d'analyse des profils clients
-    Version corrigée avec 4 profils et style amélioré
-    """
+    """Crée des graphiques détaillés d'analyse des profils clients"""
     if len(stats_clients) == 0:
         print("Aucune donnée client pour les graphiques de profils")
         return
@@ -23,26 +19,18 @@ def creer_graphiques_profils(stats_clients, recommandations=None, chemin="output
     fig.suptitle('Analyse détaillée des profils clients', 
                  fontsize=16, fontweight='bold', color=BLEU_EXCELLIA, y=1.02)
     
-    # =========================================================
-    # Graphique 1: Répartition des profils (Camembert amélioré)
-    # =========================================================
+    # Graphique 1: Camembert
     ax1 = axes[0, 0]
     profil_counts = stats_clients['profil'].value_counts()
-    
-    # S'assurer que les profils sont dans l'ordre souhaité
     ordre_profils = ['Premium', 'Gros dépensier actif', 'Client régulier', 'Client occasionnel']
     profil_counts = profil_counts.reindex([p for p in ordre_profils if p in profil_counts.index])
     
     colors = [ROSE_EXCELLIA, ORANGE_EXCELLIA, BLEU_EXCELLIA, VERT_EXCELLIA][:len(profil_counts)]
     explode = [0.03] * len(profil_counts)
     
-    wedges, texts, autotexts = ax1.pie(profil_counts.values, 
-                                        labels=profil_counts.index,
-                                        autopct=lambda pct: f'{pct:.1f}%',
-                                        colors=colors,
-                                        explode=explode,
-                                        shadow=True,
-                                        startangle=90)
+    wedges, texts, autotexts = ax1.pie(profil_counts.values, labels=profil_counts.index,
+                                        autopct=lambda pct: f'{pct:.1f}%', colors=colors,
+                                        explode=explode, shadow=True, startangle=90)
     
     for autotext in autotexts:
         autotext.set_color('white')
@@ -55,13 +43,9 @@ def creer_graphiques_profils(stats_clients, recommandations=None, chemin="output
     
     ax1.set_title('Répartition des profils clients', fontsize=13, fontweight='bold', color=BLEU_EXCELLIA)
     
-    # =========================================================
-    # Graphique 2: Montant total par profil (barres horizontales)
-    # =========================================================
+    # Graphique 2: Montant total par profil
     ax2 = axes[0, 1]
     total_par_profil = stats_clients.groupby('profil')['montant_total'].sum().sort_values(ascending=True)
-    
-    # Réordonner
     total_par_profil = total_par_profil.reindex([p for p in ordre_profils if p in total_par_profil.index])
     
     bars = ax2.barh(total_par_profil.index, total_par_profil.values, 
@@ -80,9 +64,7 @@ def creer_graphiques_profils(stats_clients, recommandations=None, chemin="output
             label = f'{val:.0f} TND'
         ax2.text(val + max_val * 0.02, i, label, va='center', fontsize=9, fontweight='bold')
     
-    # =========================================================
-    # Graphique 3: Nombre moyen de transactions par profil
-    # =========================================================
+    # Graphique 3: Nombre moyen de transactions
     ax3 = axes[1, 0]
     trans_par_profil = stats_clients.groupby('profil')['nb_transactions'].mean().sort_values(ascending=True)
     trans_par_profil = trans_par_profil.reindex([p for p in ordre_profils if p in trans_par_profil.index])
@@ -97,9 +79,7 @@ def creer_graphiques_profils(stats_clients, recommandations=None, chemin="output
     for i, (profil, val) in enumerate(trans_par_profil.items()):
         ax3.text(val + max_trans * 0.02, i, f'{val:.1f}', va='center', fontsize=9, fontweight='bold')
     
-    # =========================================================
     # Graphique 4: Montant moyen par transaction
-    # =========================================================
     ax4 = axes[1, 1]
     montant_moyen_par_profil = stats_clients.groupby('profil')['montant_moyen'].mean().sort_values(ascending=True)
     montant_moyen_par_profil = montant_moyen_par_profil.reindex([p for p in ordre_profils if p in montant_moyen_par_profil.index])

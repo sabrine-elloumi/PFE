@@ -2,7 +2,7 @@
 RESUME ETL - SMART PERSONAL FINANCE WALLET
 ======================================================================
 
-Date: 04/04/2026 23:39
+Date: 22/04/2026 10:51
 
 1. STATISTIQUES GLOBALES
 --------------------------------------------------
@@ -29,8 +29,8 @@ Date: 04/04/2026 23:39
 3. ANALYSE FOURNISSEURS
 --------------------------------------------------
    Fournisseurs actifs: 9
-   Transactions: 1,906
-   Montant total: 234,309.87 TND
+   Transactions: 43,196
+   Montant total: 58,410,606.03 TND
 
 ======================================================================
 FIN DU RESUME
